@@ -169,25 +169,24 @@ def _get_http_options():
     method = transcoded_request['method']
     headers = dict(metadata)
     headers['Content-Type'] = 'application/json'
-    with otel_start_span(name=f"T4.shared_macros.RestTransport: {method} {uri} {{async_prefix}} : _get_response"):
-        response = {{ await_prefix }}getattr(session, method)(
-            "{host}{uri}".format(host=host, uri=uri),
-            timeout=timeout,
-            headers=headers,
-            params=rest_helpers.flatten_query_params(query_params, strict=True),
-            {% if body_spec %}
-            data=body,
-            {% endif %}
-            {% if not is_async and is_streaming_method %}
-            {# NOTE: The underlying `requests` library used for making a sync request
-             # requires us to set `stream=True` to avoid loading the entire response
-             # into memory at once. For an async request, given its nature where it
-             # reads data chunk by chunk, this is not required.
-            #}
-            stream=True,
-            {% endif %}
-            )
-        return response
+    response = {{ await_prefix }}getattr(session, method)(
+        "{host}{uri}".format(host=host, uri=uri),
+        timeout=timeout,
+        headers=headers,
+        params=rest_helpers.flatten_query_params(query_params, strict=True),
+        {% if body_spec %}
+        data=body,
+        {% endif %}
+        {% if not is_async and is_streaming_method %}
+        {# NOTE: The underlying `requests` library used for making a sync request
+         # requires us to set `stream=True` to avoid loading the entire response
+         # into memory at once. For an async request, given its nature where it
+         # reads data chunk by chunk, this is not required.
+        #}
+        stream=True,
+        {% endif %}
+        )
+    return response
 {% endmacro %}
 
 {# rest_call_method_common includes the common code for a rest __call__ method to be
@@ -242,8 +241,7 @@ def _get_http_options():
         )
 
     # Send the request
-    with otel_start_span(name=f"T3.shared_macros.RestTransport: {{method_name}} rest_call_method_common"):
-      response = {{ await_prefix }}{{ async_class_prefix }}{{ service_name }}RestTransport._{{method_name}}._get_response(self._host, metadata, query_params, self._session, timeout, transcoded_request{% if body_spec %}, body{% endif %})
+    response = {{ await_prefix }}{{ async_class_prefix }}{{ service_name }}RestTransport._{{method_name}}._get_response(self._host, metadata, query_params, self._session, timeout, transcoded_request{% if body_spec %}, body{% endif %})
 
     # In case of error, raise the appropriate core_exceptions.GoogleAPICallError exception
     # subclass.

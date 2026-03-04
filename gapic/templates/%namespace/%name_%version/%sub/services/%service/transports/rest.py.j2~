@@ -14,8 +14,7 @@ from google.api_core import rest_helpers
 from google.api_core import rest_streaming
 from google.api_core import gapic_v1
 import google.protobuf
-from google.api_core import otel_start_span 
-  
+
 from google.protobuf import json_format
 {% if service.has_lro %}
 from google.api_core import operations_v1
