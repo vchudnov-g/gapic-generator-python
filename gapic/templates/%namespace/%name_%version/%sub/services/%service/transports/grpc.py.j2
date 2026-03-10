@@ -20,6 +20,7 @@ from google.auth import credentials as ga_credentials  # type: ignore
 from google.auth.transport.grpc import SslCredentials  # type: ignore
 from google.protobuf.json_format import MessageToJson
 import google.protobuf.message
+from google.api_core import otel_start_span 
 
 import grpc  # type: ignore
 import proto  # type: ignore
@@ -62,7 +63,8 @@ _LOGGER = std_logging.getLogger(__name__)
 class _LoggingClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # pragma: NO COVER
     def intercept_unary_unary(self, continuation, client_call_details, request):
 {{ shared_macros.unary_request_interceptor_common(service) }}
-        response = continuation(client_call_details, request)
+        with otel_start_span(name=f"T4(otel:gg00).grpc {str(client_call_details.method)}"):
+          response = continuation(client_call_details, request)
         if logging_enabled:  # pragma: NO COVER
             response_metadata = response.trailing_metadata()
             # Convert gRPC metadata `<class 'grpc.aio._metadata.Metadata'>` to list of tuples
