@@ -169,7 +169,7 @@ def _get_http_options():
     method = transcoded_request['method']
     headers = dict(metadata)
     headers['Content-Type'] = 'application/json'
-    with otel_start_span(name=f"T4(otel:gs00) {method} {uri} {{async_prefix}} : _get_response", attributes={"file": __file__, "template": "shared_macros"}):
+    with otel_start_span(name=f"T4(otel:gs00) {method} {uri} {{async_prefix}} : _get_response", attributes={"file": __file__, "template": "shared_macros"}, transport=OtelTransport.REST):
         response = {{ await_prefix }}getattr(session, method)(
             "{host}{uri}".format(host=host, uri=uri),
             timeout=timeout,
